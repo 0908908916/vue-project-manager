@@ -1,0 +1,555 @@
+Vue.js 專題架構  物件管理系統
+
+網址: https://aquamarine-meerkat-6961ca.netlify.app/
+
+專題主要功能模組
+前端框架：Vue 3 + Vite
+樣式框架：Tailwind CSS
+主要功能：新增、編輯、刪除、搜尋物件
+資料存放：前端暫存 (可延伸串接後端 API)
+介面設計：卡片式彩色 UI，支援自動換行
+
+專案目錄：
+src/
+ ├── App.vue (主介面)
+ ├── main.js (入口檔案)
+ ├── main.css 
+ ├── store.js 
+ ├── assets/ (資源資料夾)
+ ├── components/
+      ├── ObjectList.vue (物件清單)
+      ├── ObjectForm.vue (新增/編輯表單)
+ ├── styles.css (Tailwind 設定)
+ ├── styles.css (Tailwind 設定)
+ ├── styles.css (Tailwind 設定)
+ ├── styles.css (Tailwind 設定)
+ ├── styles.css (Tailwind 設定)
+
+核心功能：
+物件新增：輸入名稱與描述
+物件編輯：修改既有物件資訊
+物件刪除：移除指定物件
+物件搜尋：依名稱即時篩選
+介面美化：彩色卡片，自動換行，限制行數
+
+------------------------------------------------------------------------
+
+專題需求設定
+
+假設你的專題是「物件管理系統」，功能需求可以先簡單定義：
+
+顯示物件列表
+
+新增物件
+
+編輯物件
+
+刪除物件
+
+可以存資料到本地（初期使用 LocalStorage 模擬資料庫）
+
+
+- id (自動產生)
+- 名稱
+- 類別
+- 描述
+- 數量
+
+步驟 1：建立專案
+
+安裝 Node.js（建議 18 以上）
+
+開啟終端機，建立 Vue 3 專案：
+
+
+npm create vite@latest vue-object-project
+
+選擇：
+
+Project name: vue-object-project
+
+Framework: Vue
+
+yes
+
+yes
+
+Variant: Vue 3 + JavaScript（或 TypeScript）
+
+進入資料夾並安裝套件：
+
+cd vue-object-project
+npm install
+
+npm run dev
+
+打開瀏覽器，應該可以看到 Vite 的預設頁面。
+
+
+ChatGPT 說：
+
+太好了！我們可以在現有物件管理系統基礎上，加上排版美化與進階功能，讓頁面更像專題作品。
+
+我建議用 Tailwind CSS 做前端樣式快速美化，並加上：
+
+卡片列表或漂亮表格
+
+搜尋/篩選物件
+
+分頁（可選，資料少可以先不做）
+
+按鈕、表單樣式美化
+
+簡單顏色、間距調整
+
+npm install -D tailwindcss @tailwindcss/postcss postcss
+npm install -D tailwindcss postcss autoprefixer
+npm install -D tailwindcss@latest @tailwindcss/postcss@latest postcss@latest autoprefixer@latest
+
+會生成：
+
+tailwind.config.js
+
+postcss.config.js
+
+----------------------------------------------------------
+在 src/main.css（如果沒有就新建）：
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+----------------------------------------------------------
+
+src/main.js
+
+import { createApp } from "vue";
+import App from "./App.vue";
+import "./main.css";
+
+createApp(App).mount("#app");
+
+
+----------------------------------------------------------
+
+style.css
+
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+.card {
+  padding: 2em;
+}
+
+#app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
+
+
+
+---------------------------------------------------------
+
+vite.config.js
+
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [vue()],
+})
+
+----------------------------------------------------------
+
+
+src/store.js
+
+import { reactive } from "vue";
+
+export const store = reactive({
+  objects: JSON.parse(localStorage.getItem("objects")) || [],
+
+  addObject(obj) {
+    obj.id = Date.now();
+    this.objects.push(obj);
+    this.save();
+  },
+
+  updateObject(updatedObj) {
+    const index = this.objects.findIndex((o) => o.id === updatedObj.id);
+    if (index !== -1) {
+      this.objects[index] = updatedObj;
+      this.save();
+    }
+  },
+
+  deleteObject(id) {
+    this.objects = this.objects.filter((o) => o.id !== id);
+    this.save();
+  },
+
+  save() {
+    localStorage.setItem("objects", JSON.stringify(this.objects));
+  },
+});
+
+
+----------------------------------------------------------
+
+App.vue
+
+<template>
+  <div class="min-h-screen bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 p-4">
+    <div class="max-w-5xl mx-auto bg-white/90 shadow-2xl rounded-2xl p-6 md:p-8 backdrop-blur-sm">
+      <h1 class="text-3xl md:text-4xl font-extrabold mb-6 text-center text-purple-900 drop-shadow-lg">
+        🌟 物件管理系統
+      </h1>
+
+      <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <button @click="showForm = true; editObj = null"
+                class="bg-gradient-to-r from-green-400 to-blue-500 text-white px-5 py-2 rounded-xl shadow-lg hover:from-green-500 hover:to-blue-600 transition w-full md:w-auto text-center">
+          新增物件
+        </button>
+        <input type="text" placeholder="搜尋物件..." v-model="searchText"
+               class="border border-gray-300 px-3 py-2 rounded-xl w-full md:w-1/3 focus:outline-none focus:ring-4 focus:ring-pink-300 transition" />
+      </div>
+
+      <ObjectForm v-if="showForm" :editObj="editObj" @cancel="showForm = false" @save="handleSave"/>
+      <ObjectList v-else :items="items" :searchText="searchText" @edit="handleEdit" @delete="handleDelete"/>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import ObjectList from './components/ObjectList.vue'
+import ObjectForm from './components/ObjectForm.vue'
+
+const showForm = ref(false)
+const editObj = ref(null)
+const searchText = ref('')
+
+const items = ref([
+  { id: 1, name: '物件 A', description: '這是物件 A 的描述' },
+  { id: 2, name: '物件 B', description: '這是物件 B 的描述' },
+  { id: 3, name: '物件 C', description: '這是物件 C 的描述' },
+])
+
+const handleEdit = (obj) => {
+  editObj.value = obj
+  showForm.value = true
+}
+
+const handleDelete = (id) => {
+  items.value = items.value.filter(i => i.id !== id)
+}
+
+const handleSave = (obj) => {
+  if (obj.id) {
+    const index = items.value.findIndex(i => i.id === obj.id)
+    if (index !== -1) items.value[index] = obj
+  } else {
+    obj.id = Date.now()
+    items.value.push(obj)
+  }
+  showForm.value = false
+}
+</script>
+
+
+---------------------------------------------------
+
+ObjectForm.vue
+
+<template>
+  <div class="bg-gradient-to-r from-blue-100 via-purple-100 to-pink-100 p-6 rounded-2xl shadow-lg max-w-md mx-auto">
+    <h2 class="text-2xl md:text-3xl font-extrabold mb-4 text-purple-900">
+      {{ editObj ? '編輯物件' : '新增物件' }}
+    </h2>
+    <form @submit.prevent="handleSubmit" class="space-y-4">
+      <div>
+        <label class="block mb-1 font-medium text-purple-800">名稱</label>
+        <input v-model="name" type="text" placeholder="輸入名稱"
+               class="w-full border border-purple-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-4 focus:ring-pink-300 transition" />
+      </div>
+      <div>
+        <label class="block mb-1 font-medium text-purple-800">描述</label>
+        <textarea v-model="description" placeholder="輸入描述"
+                  class="w-full border border-purple-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-4 focus:ring-pink-300 transition"></textarea>
+      </div>
+      <div class="flex justify-end gap-2 flex-wrap">
+        <button type="button" @click="$emit('cancel')"
+                class="bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400 transition">
+          取消
+        </button>
+        <button type="submit"
+                class="bg-gradient-to-r from-green-400 to-blue-500 px-4 py-2 text-white rounded-lg hover:from-green-500 hover:to-blue-600 transition">
+          {{ editObj ? '更新' : '新增' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</template>
+
+<script setup>
+import { ref, watch } from 'vue'
+
+const props = defineProps({
+  editObj: Object
+})
+const emit = defineEmits(['cancel', 'save'])
+
+const name = ref('')
+const description = ref('')
+
+watch(() => props.editObj, (val) => {
+  if (val) {
+    name.value = val.name
+    description.value = val.description
+  } else {
+    name.value = ''
+    description.value = ''
+  }
+})
+
+const handleSubmit = () => {
+  if (!name.value.trim()) return alert('名稱不能為空')
+  if (!description.value.trim()) return alert('描述不能為空')
+  emit('save', {
+    id: props.editObj ? props.editObj.id : null,
+    name: name.value,
+    description: description.value
+  })
+}
+</script>
+
+
+
+
+
+
+---------------------------------------------------
+
+ObjectList.vue
+
+<template>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div v-for="item in filteredItems" :key="item.id"
+         class="bg-gradient-to-br from-yellow-200 via-pink-200 to-purple-300 
+                rounded-2xl shadow-lg p-5 w-full break-words overflow-hidden">
+      <h2 class="text-xl md:text-2xl font-bold mb-2 text-purple-900 break-words truncate">
+        {{ item.name }}
+      </h2>
+      <p class="text-gray-700 mb-4 break-words">
+        {{ item.description }}
+      </p>
+      <div class="flex justify-end gap-2 flex-wrap">
+        <button @click="$emit('edit', item)"
+                class="bg-gradient-to-r from-indigo-400 to-purple-500 text-white px-3 py-1 rounded-lg hover:from-indigo-500 hover:to-purple-600 transition">
+          編輯
+        </button>
+        <button @click="$emit('delete', item.id)"
+                class="bg-gradient-to-r from-red-400 to-pink-500 text-white px-3 py-1 rounded-lg hover:from-red-500 hover:to-pink-600 transition">
+          刪除
+        </button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { computed } from 'vue'
+
+const props = defineProps({
+  items: Array,
+  searchText: String
+})
+
+const filteredItems = computed(() => {
+  if (!props.searchText) return props.items
+  return props.items.filter(i => i.name.toLowerCase().includes(props.searchText.toLowerCase()))
+})
+</script>
+
+
+------------------------------------------------
+
+tailwind.config.cjs
+
+
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./index.html",
+    "./src/**/*.{vue,js,ts}"
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+
+
+-------------------------------------------------------
+
+postcss.config.cjs
+
+
+module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  }
+}
+
+-------------------------------------------------------
+
+src/main.js
+
+import { createApp } from 'vue'
+import App from './App.vue'
+import './main.css'   // <-- 引入 Tailwind CSS
+
+createApp(App).mount('#app')
+
+
+-------------------------------------------------------
+
+package.json
+
+{
+  "name": "vue-object-project",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.5.21"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.13",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.13",
+    "vite": "npm:rolldown-vite@7.1.12"
+  },
+  "overrides": {
+    "vite": "npm:rolldown-vite@7.1.12"
+  }
+}
+
+
+-------------------------------------------------------
+
+
+你這個專案是 Vue 3 + Vite 架構，所以要打包輸出靜態網頁到一個資料夾，只要用 Vite 的 build 指令：
+
+npm run build
+
+執行後流程：
+
+會在專案根目錄生成一個 dist/ 資料夾。
+
+裡面包含 index.html、壓縮過的 JS、CSS 檔案。
+
+這就是可以直接丟到網站伺服器（例如 Nginx、Apache、GitHub Pages）的檔案。
+
+如果想在本地測試打包後的網站：
+
+npm run preview
+
+
+預設會開在 http://localhost:4173。
+
+部署方式
+
+一般網頁伺服器 (Apache / Nginx) → 把 dist/ 整包上傳到伺服器即可。
+
+GitHub Pages → 可以用 gh-pages 套件部署，或直接丟 dist/ 到 gh-pages 分支。
+
+Netlify / Vercel → 在建置設定輸入 npm run build，發佈資料夾設 dist。
+
+-------------------------------------------------------
+
+執行程式指令 
+
+npm run dev
+
+
+
+
+
