@@ -394,88 +394,49 @@ const handleSubmit = () => {
 
 
 
-
-
-
 ---------------------------------------------------
 
 ObjectList.vue
 
-<script setup>
-import { ref, onMounted, watch } from 'vue'
-
-const objects = ref([])
-const newObject = ref('')
-
-// 頁面載入時，從 localStorage 讀取資料
-onMounted(() => {
-  const saved = localStorage.getItem('objects')
-  if (saved) {
-    objects.value = JSON.parse(saved)
-  }
-})
-
-// 監聽 objects，資料變動時存回 localStorage
-watch(objects, (newVal) => {
-  localStorage.setItem('objects', JSON.stringify(newVal))
-}, { deep: true })
-
-// 新增物件
-const addObject = () => {
-  if (newObject.value.trim() === '') return
-  objects.value.push({ id: Date.now(), name: newObject.value })
-  newObject.value = ''
-}
-
-// 刪除物件
-const removeObject = (id) => {
-  objects.value = objects.value.filter(obj => obj.id !== id)
-}
-</script>
-
 <template>
-  <div class="max-w-md mx-auto bg-white shadow-md rounded p-4">
-    <h1 class="text-xl font-bold mb-4">📦 物件列表</h1>
-
-    <!-- 新增物件 -->
-    <div class="flex gap-2 mb-4">
-      <input
-        v-model="newObject"
-        type="text"
-        placeholder="輸入物件名稱"
-        class="border rounded px-2 py-1 flex-1"
-      />
-      <button
-        @click="addObject"
-        class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-      >
-        新增
-      </button>
-    </div>
-
-    <!-- 物件列表 -->
-    <ul>
-      <li
-        v-for="obj in objects"
-        :key="obj.id"
-        class="flex justify-between items-center bg-gray-100 p-2 rounded mb-2"
-      >
-        <span>{{ obj.name }}</span>
-        <button
-          @click="removeObject(obj.id)"
-          class="text-red-500 hover:text-red-700"
-        >
-          ❌
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div v-for="item in filteredItems" :key="item.id"
+         class="bg-gradient-to-br from-yellow-200 via-pink-200 to-purple-300 
+                rounded-2xl shadow-lg p-5 w-full break-words overflow-hidden">
+      <h2 class="text-xl md:text-2xl font-bold mb-2 text-purple-900 break-words truncate">
+        {{ item.name }}
+      </h2>
+      <p class="text-gray-700 mb-4 break-words">
+        {{ item.description }}
+      </p>
+      <div class="flex justify-end gap-2 flex-wrap">
+        <button @click="$emit('edit', item)"
+                class="bg-gradient-to-r from-indigo-400 to-purple-500 text-white px-3 py-1 rounded-lg hover:from-indigo-500 hover:to-purple-600 transition">
+          編輯
         </button>
-      </li>
-    </ul>
-
-    <!-- 沒有物件時 -->
-    <p v-if="objects.length === 0" class="text-gray-500 text-sm text-center">
-      尚未新增任何物件
-    </p>
+        <button @click="$emit('delete', item.id)"
+                class="bg-gradient-to-r from-red-400 to-pink-500 text-white px-3 py-1 rounded-lg hover:from-red-500 hover:to-pink-600 transition">
+          刪除
+        </button>
+      </div>
+    </div>
   </div>
 </template>
+
+<script setup>
+import { computed } from 'vue'
+
+const props = defineProps({
+  items: Array,
+  searchText: String
+})
+
+const filteredItems = computed(() => {
+  if (!props.searchText) return props.items
+  return props.items.filter(i => i.name.toLowerCase().includes(props.searchText.toLowerCase()))
+})
+</script>
+
 
 
 
