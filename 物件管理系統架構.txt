@@ -20,10 +20,7 @@ src/
       ├── ObjectList.vue (物件清單)
       ├── ObjectForm.vue (新增/編輯表單)
  ├── styles.css (Tailwind 設定)
- ├── styles.css (Tailwind 設定)
- ├── styles.css (Tailwind 設定)
- ├── styles.css (Tailwind 設定)
- ├── styles.css (Tailwind 設定)
+
 
 核心功能：
 物件新增：輸入名稱與描述
@@ -36,7 +33,7 @@ src/
 
 專題需求設定
 
-假設你的專題是「物件管理系統」，功能需求可以先簡單定義：
+專題是「物件管理系統」，功能需求可以先簡單定義：
 
 顯示物件列表
 
@@ -86,11 +83,7 @@ npm run dev
 打開瀏覽器，應該可以看到 Vite 的預設頁面。
 
 
-ChatGPT 說：
-
-太好了！我們可以在現有物件管理系統基礎上，加上排版美化與進階功能，讓頁面更像專題作品。
-
-我建議用 Tailwind CSS 做前端樣式快速美化，並加上：
+建議用 Tailwind CSS 做前端樣式快速美化，並加上：
 
 卡片列表或漂亮表格
 
@@ -515,7 +508,7 @@ package.json
 -------------------------------------------------------
 
 
-你這個專案是 Vue 3 + Vite 架構，所以要打包輸出靜態網頁到一個資料夾，只要用 Vite 的 build 指令：
+專案是 Vue 3 + Vite 架構，所以要打包輸出靜態網頁到一個資料夾，只要用 Vite 的 build 指令：
 
 npm run build
 
@@ -547,6 +540,7 @@ Netlify / Vercel → 在建置設定輸入 npm run build，發佈資料夾設 di
 執行程式指令 
 
 npm run dev
+
 
 
 
